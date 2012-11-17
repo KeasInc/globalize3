@@ -36,6 +36,14 @@ module Globalize
         end
       end
 
+      def changed?
+        @globalize.changed || super
+      end
+
+      def changes
+        @globalize.changes.merge(super)
+      end
+
       def write_attribute(name, value, options = {})
         # raise 'y' if value.nil? # TODO.
 
@@ -46,8 +54,8 @@ module Globalize
             options = {:locale => options}
           end
           options = {:locale => nil}.merge(options)
-          attribute_will_change! name.to_s
           the_locale = options[:locale] || Globalize.locale
+          attribute_will_change! name.to_s if the_locale == I18n.default_locale
           self.translations.reject!{|t| t.new_record? && t.locale != the_locale}
           globalize.write(the_locale, name, value)
         else

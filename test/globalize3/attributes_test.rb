@@ -37,6 +37,30 @@ class AttributesTest < Test::Unit::TestCase
     assert_equal new_email, user.write_attribute('email', new_email)
   end
 
+  test "write_attribute marks the attribute changed in default locale" do
+    post = Post.create(:title => 'foo')
+    I18n.locale = I18n.default_locale
+    post.title = "Bar!"
+    assert post.changed?
+    assert post.changed_attributes.include?("title")
+  end
+
+  test "saving unmarks the object changed" do
+    post = Post.create(:title => 'foo')
+    I18n.locale = I18n.default_locale
+    post.title = "Baz!"
+    post.save!
+    assert !post.changed?
+  end
+
+  test "write_attribute doesn't mark the attribute changed in a non-default locale" do
+    post = Post.create(:title => 'foo')
+    I18n.locale = :da
+    post.title = "Baf!"
+    assert post.changed?
+    assert !post.changed_attributes.include?(:title)
+  end
+
   test 'translated_attribute_names returns translated attribute names' do
     assert_equal [:title, :content], Post.translated_attribute_names & [:title, :content]
   end
