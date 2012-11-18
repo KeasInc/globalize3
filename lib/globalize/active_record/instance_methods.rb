@@ -55,7 +55,13 @@ module Globalize
           end
           options = {:locale => nil}.merge(options)
           the_locale = options[:locale] || Globalize.locale
-          attribute_will_change! name.to_s if the_locale == I18n.default_locale
+          if the_locale == I18n.default_locale || self.new_record?
+            if use_instance_value?(name, the_locale)
+              super(name, value)
+            else
+              attribute_will_change! name.to_s
+            end
+          end
           self.translations.reject!{|t| t.new_record? && t.locale != the_locale}
           globalize.write(the_locale, name, value)
         else
@@ -71,8 +77,9 @@ module Globalize
         end
 
         options = {:translated => true, :locale => nil}.merge(options)
-        if self.class.translated?(name) and options[:translated]
-          globalize.fetch(options[:locale] || Globalize.locale, name)
+        the_locale = options[:locale] || Globalize.locale
+        if self.class.translated?(name) and options[:translated] and !use_instance_value?(name, the_locale)
+          globalize.fetch(the_locale, name)
         else
           super(name)
         end
@@ -84,6 +91,10 @@ module Globalize
 
       def translated?(name)
         self.class.translated?(name)
+      end
+
+      def use_instance_value?(name, locale = Globalize.locale)
+        !@rolled_back && self.class.use_instance_value?(name, locale)
       end
 
       def translated_attributes
@@ -115,6 +126,7 @@ module Globalize
       end
 
       def reload(options = nil)
+        @rolled_back = false
         @translation_caches.clear if defined? @translation_caches
         translated_attribute_names.each { |name| @attributes.delete(name.to_s) }
         globalize.reset
@@ -155,6 +167,7 @@ module Globalize
       end
 
       def rollback
+        @rolled_back = true
         @translation_caches[::Globalize.locale] = translation.previous_version
       end
 

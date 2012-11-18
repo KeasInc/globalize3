@@ -61,6 +61,17 @@ class AttributesTest < Test::Unit::TestCase
     assert !post.changed_attributes.include?(:title)
   end
 
+  test "setting the value in the default locale updates the base object" do
+    I18n.locale = I18n.default_locale
+    t = Task.create(:name => "alpha")
+    assert_equal Task.where(:name => "alpha", :id => t.id).count, 1
+
+    I18n.locale = :de
+    t.update_attribute(:name, "bravo")
+    assert_equal Task.where(:name => "alpha", :id => t.id).count, 1
+    assert_equal Task.where(:name => "bravo", :id => t.id).count, 0
+  end
+
   test 'translated_attribute_names returns translated attribute names' do
     assert_equal [:title, :content], Post.translated_attribute_names & [:title, :content]
   end

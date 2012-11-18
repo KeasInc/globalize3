@@ -30,6 +30,12 @@ module Globalize
         translated_attribute_names.include?(name.to_sym)
       end
 
+      def use_instance_value?(name, locale = Globalize.locale)
+        (locale == I18n.default_locale) &&
+          Globalize.fallbacks(locale) != [locale] &&
+          attribute_names.include?(name.to_s)
+      end
+
       def required_attributes
         validators.map { |v| v.attributes if v.is_a?(ActiveModel::Validations::PresenceValidator) }.flatten
       end
