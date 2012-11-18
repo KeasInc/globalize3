@@ -37,11 +37,11 @@ module Globalize
       end
 
       def changed?
-        @globalize.changed || super
+        globalize.changed || super
       end
 
       def changes
-        @globalize.changes.merge(super)
+        globalize.changes.merge(super)
       end
 
       def write_attribute(name, value, options = {})
