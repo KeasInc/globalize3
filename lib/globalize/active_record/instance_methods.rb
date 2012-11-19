@@ -93,16 +93,18 @@ module Globalize
         self.class.translated?(name)
       end
 
-      def use_instance_value?(name, locale = Globalize.locale)
+      def use_instance_value?(name, locale)
         !@rolled_back &&
           locale == I18n.default_locale &&
           globalize_fallbacks(locale) == [locale] &&
           self.class.attribute_names.include?(name.to_s)
       end
 
-      def translated_attributes
-        translated_attribute_names.inject({}) do |attributes, name|
-          attributes.merge(name.to_s => translation.send(name))
+      def translated_attributes(locale = ::Globalize.locale)
+        translated_attribute_names.reject {|name|
+          use_instance_value?(name, locale)
+        }.inject({}) do |attributes, name|
+          attributes.merge(name.to_s => translation_for(locale).send(name))
         end
       end
 

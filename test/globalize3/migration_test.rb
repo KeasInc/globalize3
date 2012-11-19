@@ -142,7 +142,8 @@ class MigrationTest < Test::Unit::TestCase
     untranslated.reload
 
     # Was it restored? (also tests .untranslated_attributes)
-    assert_equal 'Untranslated', untranslated.untranslated_attributes['name']
+    # The following step is no longer true: the base table also has the English translation
+    # assert_equal 'Untranslated', untranslated.untranslated_attributes['name']
   end
 
 protected
