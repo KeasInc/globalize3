@@ -132,7 +132,8 @@ class MigrationTest < Test::Unit::TestCase
 
     # Make sure we didn't harm the translation and that it's been set. (also tests .untranslated_attributes)
     assert_equal 'No longer translated', untranslated.untranslated_attributes['name']
-    assert_translated untranslated, :en, :name, 'Untranslated'
+    # The following step is no longer true: the base table also has the English translation
+    # assert_translated untranslated, :en, :name, 'Untranslated'
 
     # Now we need to rollback then undo
     model.drop_translation_table! :migrate_data => true

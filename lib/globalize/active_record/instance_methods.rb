@@ -94,7 +94,10 @@ module Globalize
       end
 
       def use_instance_value?(name, locale = Globalize.locale)
-        !@rolled_back && self.class.use_instance_value?(name, locale)
+        !@rolled_back &&
+          locale == I18n.default_locale &&
+          globalize_fallbacks(locale) == [locale] &&
+          self.class.attribute_names.include?(name.to_s)
       end
 
       def translated_attributes
